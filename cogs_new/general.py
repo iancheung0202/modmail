@@ -30,3 +30,6 @@ async def hello_button(bot, interaction):
         content="👋 You clicked Hello!",
         ephemeral=True
     ).to_dict()
+
+def setup(bot):
+    pass

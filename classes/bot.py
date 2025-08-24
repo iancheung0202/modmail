@@ -95,9 +95,9 @@ class ModMail(commands.AutoShardedBot):
             "snippet",
         ]
 
-        # self._cogs_new = [
-        #     "general",
-        # ]
+        self._cogs_new = [
+            "general",
+        ]
 
     @property
     def state(self):
@@ -328,12 +328,12 @@ class ModMail(commands.AutoShardedBot):
                 log.error(f"Failed to load extension {extension}.", file=sys.stderr)
                 log.error(traceback.print_exc())
 
-        # for extension in self._cogs_new:
-        #     try:
-        #         self.load_extension("cogs_new." + extension)
-        #     except Exception:
-        #         log.error(f"Failed to load extension {extension}.", file=sys.stderr)
-        #         log.error(traceback.print_exc())
+        for extension in self._cogs_new:
+            try:
+                self.load_extension("cogs_new." + extension)
+            except Exception:
+                log.error(f"Failed to load extension {extension}.", file=sys.stderr)
+                log.error(traceback.print_exc())
 
         async with self._amqp_queue.iterator() as queue_iter:
             async for message in queue_iter:
