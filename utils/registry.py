@@ -1,5 +1,6 @@
 from typing import List, Callable, Any, Dict
-from interactions import Embed, ActionRow, Button, ButtonStyle
+from interactions import ActionRow, Button, ButtonStyle
+from classes.embed import Embed
 
 class Registry:
     def __init__(self):
@@ -91,11 +92,7 @@ async def ping(bot, interaction):
 @registry.command("hello", "Say hello")
 async def hello(bot, interaction):
     user = interaction["member"]["user"]["username"]
-    embed = Embed(
-        title="Hello!",
-        description=f"👋 Hey {user}, nice to meet you.",
-        color=0x5865F2
-    )
+    embed = Embed("Hello!", f"👋 Hey {user}, nice to meet you.")
 
     button = Button(
         style=ButtonStyle.SUCCESS,
