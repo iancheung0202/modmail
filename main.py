@@ -229,26 +229,17 @@ class Scheduler:
         self.loop.create_task(self.premium_updater())
         self.loop.create_task(self.cleanup())
 
-class SlashCommand(dict):
-    def __init__(self, name, description, callback, type_=1, options=None):
-        super().__init__(
-            name=name,
-            description=description,
-            type=type_,
-            options=options or []
-        )
-        self.callback = callback
-
 class Registry:
     def __init__(self):
         self.commands = {} 
         self.components = {}
 
-    def command(self, name, description="No description"):
+    def command(self, name, description="No description", options=None):
         def decorator(func):
             self.commands[name] = {
                 "callback": func,
                 "description": description,
+                "options": options or []
             }
             return func
         return decorator
@@ -259,6 +250,7 @@ class Registry:
                 "name": name,
                 "description": meta["description"],
                 "type": 1,  # CHAT_INPUT
+                "options": meta["options"]
             }
             for name, meta in self.commands.items()
         ]
