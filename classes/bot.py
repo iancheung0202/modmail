@@ -165,7 +165,6 @@ class ModMail(commands.AutoShardedBot):
     
         if event == "INTERACTION_CREATE":
             try:
-                # Get the interaction data
                 interaction_id = data.get("id")
                 interaction_token = data.get("token")
                 interaction_type = data.get("type")
@@ -174,10 +173,8 @@ class ModMail(commands.AutoShardedBot):
                     log.error("Missing interaction ID or token")
                     return
                     
-                # Dispatch to registry
                 response_payload = await registry.dispatch(self, data)
                 
-                # Send response
                 callback_url = f"https://discord.com/api/v10/interactions/{interaction_id}/{interaction_token}/callback"
                 async with self.session.post(
                     callback_url,
