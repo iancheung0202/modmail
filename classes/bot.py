@@ -77,6 +77,7 @@ class ModMail(commands.AutoShardedBot):
             "MESSAGE_CREATE",
             "MESSAGE_REACTION_ADD",
             "READY",
+            "INTERACTION_CREATE"
         ]
 
         self._cogs = [
