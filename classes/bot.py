@@ -22,6 +22,7 @@ from classes.state import State
 from utils import tools
 from utils.config import Config
 from utils.prometheus import Prometheus
+from main import registry
 
 log = logging.getLogger(__name__)
 
@@ -155,24 +156,42 @@ class ModMail(commands.AutoShardedBot):
         self.ws._dispatch("socket_raw_receive", msg)
         msg = orjson.loads(msg)
         self.ws._dispatch("socket_response", msg)
-
+    
         op = msg.get("op")
         data = msg.get("d")
         event = msg.get("t")
         old = msg.get("old")
-
+    
+        if event == "INTERACTION_CREATE":
+            try:
+                response_payload = await registry.dispatch(self, data)
+            except Exception as e:
+                response_payload = {
+                    "type": 4,
+                    "data": {"content": f"Error: {e}", "flags": 64}
+                }
+    
+            interaction_id = data["id"]
+            interaction_token = data["token"]
+            callback_url = f"https://discord.com/api/v10/interactions/{interaction_id}/{interaction_token}/callback"
+            
+            async with self.session.post(callback_url, json=response_payload) as resp:
+                if resp.status >= 400:
+                    text = await resp.text()
+                    log.error(f"Interaction callback failed: {resp.status} {text}")
+    
         if op != self.ws.DISPATCH:
             return
-
+    
         try:
             func = self.ws._discord_parsers[event]
         except KeyError:
             log.debug(f"Unknown event {event}.")
             return
-
+    
         if event not in self._enabled_events:
             return
-
+    
         try:
             await func(data, old)
         except asyncio.CancelledError:
