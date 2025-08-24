@@ -27,6 +27,7 @@ COPY docker/bot/entrypoint.sh ./bin/
 COPY main.py worker.py ./
 COPY classes ./classes
 COPY cogs ./cogs
+COPY cogs_new ./cogs_new
 COPY migrations ./migrations
 COPY scripts ./scripts
 COPY utils ./utils
