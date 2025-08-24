@@ -22,7 +22,7 @@ from classes.state import State
 from utils import tools
 from utils.config import Config
 from utils.prometheus import Prometheus
-from main import registry
+from utils.registry import registry
 
 log = logging.getLogger(__name__)
 
