@@ -270,20 +270,22 @@ class Registry:
         return decorator
 
     async def dispatch(self, bot, data):
+        interaction_type = data.get("type")
         d = data.get("data", {})
-
-        if "name" in d: # slash command
-            name = d["name"]
+        
+        if interaction_type == 2:  # Application Command
+            name = d.get("name")
             cmd = self.commands.get(name)
             if cmd:
                 return await cmd["callback"](bot, data)
-
-        if "custom_id" in d: # components
-            cid = d["custom_id"]
-            cb = self.components.get(cid)
+                
+        elif interaction_type == 3:  # Message Component
+            custom_id = d.get("custom_id")
+            cb = self.components.get(custom_id)
             if cb:
                 return await cb(bot, data)
-
+        
+        # Default response for unknown interactions
         return {
             "type": 4,
             "data": {"content": "Unknown interaction.", "flags": 64},
@@ -425,12 +427,17 @@ class Main:
 
         slash_commands = registry.to_payload()
         
-        url = f"https://discord.com/api/v10/applications/{self.bot.id}/guilds/576016832956334080//commands" # ModMail Support server only
-        r = requests.put(
-            url,
-            headers={"Authorization": f"Bot {config.BOT_TOKEN}", "Content-Type": "application/json"},
-            json=slash_commands
-        )
+        url = f"https://discord.com/api/v10/applications/{self.bot.id}/guilds/576016832956334080/commands" # ModMail Support server only
+        try:
+            r = requests.put(
+                url,
+                headers={"Authorization": f"Bot {config.BOT_TOKEN}", "Content-Type": "application/json"},
+                json=slash_commands
+            )
+            r.raise_for_status()  # Raise an exception for bad status codes
+            print("Slash commands registered successfully")
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to register slash commands: {e}")
 
         for i in range(int(config.BOT_CLUSTERS)):
             self.instances.append(Instance(i + 1, loop=self.loop, main=self))
