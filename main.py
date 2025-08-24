@@ -304,7 +304,7 @@ class Main:
 
         slash_commands = registry.to_payload()
         
-        url = f"https://discord.com/api/v10/applications/{self.bot.id}/guilds/576016832956334080/commands" # ModMail Support server only
+        url = f"https://discord.com/api/v10/applications/{self.bot.id}/guilds/783528750474199041/commands" # Fischl Central
         try:
             r = requests.put(
                 url,
