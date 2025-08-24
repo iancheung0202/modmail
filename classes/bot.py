@@ -165,21 +165,32 @@ class ModMail(commands.AutoShardedBot):
     
         if event == "INTERACTION_CREATE":
             try:
+                # Get the interaction data
+                interaction_id = data.get("id")
+                interaction_token = data.get("token")
+                interaction_type = data.get("type")
+                
+                if not all([interaction_id, interaction_token]):
+                    log.error("Missing interaction ID or token")
+                    return
+                    
+                # Dispatch to registry
                 response_payload = await registry.dispatch(self, data)
+                
+                # Send response
+                callback_url = f"https://discord.com/api/v10/interactions/{interaction_id}/{interaction_token}/callback"
+                async with self.session.post(
+                    callback_url,
+                    headers={"Authorization": f"Bot {self.http.token}"},
+                    json=response_payload
+                ) as resp:
+                    if resp.status >= 400:
+                        text = await resp.text()
+                        log.error(f"Interaction callback failed: {resp.status} {text}")
+                        
             except Exception as e:
-                response_payload = {
-                    "type": 4,
-                    "data": {"content": f"Error: {e}", "flags": 64}
-                }
-    
-            interaction_id = data["id"]
-            interaction_token = data["token"]
-            callback_url = f"https://discord.com/api/v10/interactions/{interaction_id}/{interaction_token}/callback"
-            
-            async with self.session.post(callback_url, json=response_payload) as resp:
-                if resp.status >= 400:
-                    text = await resp.text()
-                    log.error(f"Interaction callback failed: {resp.status} {text}")
+                log.error(f"Error handling interaction: {e}")
+                traceback.print_exc()
     
         if op != self.ws.DISPATCH:
             return
